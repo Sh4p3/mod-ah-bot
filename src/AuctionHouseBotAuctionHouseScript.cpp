@@ -114,7 +114,7 @@ void AHBot_AuctionHouseScript::OnAuctionAdd(AuctionHouseObject* /*ah*/, AuctionE
 
     if (config->ConsiderOnlyBotAuctions)
     {
-        if (gBotsId.find(auction->owner.GetCounter()) != gBotsId.end())
+        if (gBotsId.find(auction->owner.GetCounter()) == gBotsId.end())
         {
             return;
         }
@@ -174,7 +174,7 @@ void AHBot_AuctionHouseScript::OnAuctionRemove(AuctionHouseObject* /*ah*/, Aucti
     // Consider only those auctions handled by the bots
     if (config->ConsiderOnlyBotAuctions)
     {
-        if (gBotsId.find(auction->owner.GetCounter()) != gBotsId.end())
+        if (gBotsId.find(auction->owner.GetCounter()) == gBotsId.end())
         {
             return;
         }
