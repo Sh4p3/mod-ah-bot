@@ -244,15 +244,21 @@ void AuctionHouseBot::Buy(Player* AHBplayer, AHBConfig* config, WorldSession* se
         LOG_INFO("module", "AHBot [{}]: Considering {} auctions per interval to bid on.", _id, config->GetBidsPerInterval());
     }
 
+    uint32& lastAuctionId = _lastBuyerAuctionIds[config->GetAHID()];
+
     for (uint32 count = 1; count <= config->GetBidsPerInterval(); ++count)
     {
         if (auctionsGuidsToConsider.empty()) {
             return;
         }
 
-        std::set<uint32>::iterator it = auctionsGuidsToConsider.begin();
-        std::advance(it, 0);
+        std::set<uint32>::iterator it =
+            auctionsGuidsToConsider.upper_bound(lastAuctionId);
+        if (it == auctionsGuidsToConsider.end())
+            it = auctionsGuidsToConsider.begin();
+
         uint32 auctionID = *it;
+        lastAuctionId = auctionID;
         AuctionEntry* auction = auctionHouseObject->GetAuction(auctionID);
         
         //
@@ -488,6 +494,17 @@ void AuctionHouseBot::Buy(Player* AHBplayer, AHBConfig* config, WorldSession* se
             sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
             sAuctionMgr->SendAuctionWonMail(auction, trans);
 
+            if (config->TraceBuyer)
+            {
+                LOG_INFO("module",
+                    "AHBot [{}]: Bought , itemid={}, ah={}, item={}, "
+                    "start={}, current={}, buyout={}",
+                    _id, prototype->ItemId,
+                    AuctionHouseId(auction->GetHouseId()),
+                    auction->item_template, auction->startbid,
+                    currentPrice, auction->buyout);
+            }
+
             // 
             // Removes any trace of the item
             // 
@@ -499,11 +516,6 @@ void AuctionHouseBot::Buy(Player* AHBplayer, AHBConfig* config, WorldSession* se
 
 
             CharacterDatabase.CommitTransaction(trans);
-
-            if (config->TraceBuyer)
-            {
-                LOG_INFO("module", "AHBot [{}]: Bought , itemid={}, ah={}, item={}, start={}, current={}, buyout={}", _id, prototype->ItemId, AuctionHouseId(auction->GetHouseId()), auction->item_template, auction->startbid, currentPrice, auction->buyout);
-            }
         }
     }
 }

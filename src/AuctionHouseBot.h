@@ -27,6 +27,8 @@
 #include "AuctionHouseBotCommon.h"
 #include "AuctionHouseBotConfig.h"
 
+#include <map>
+
 struct AuctionEntry;
 class  Player;
 class  WorldSession;
@@ -46,6 +48,8 @@ private:
     time_t     _lastrun_a_sec;
     time_t     _lastrun_h_sec;
     time_t     _lastrun_n_sec;
+
+    std::map<uint32, uint32> _lastBuyerAuctionIds;
 
     //
     // Main operations

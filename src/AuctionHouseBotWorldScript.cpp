@@ -54,6 +54,16 @@ void AHBot_WorldScript::OnBeforeConfigLoad(bool reload)
                 Field* fields = result->Fetch();
                 uint32 botId  = fields[0].Get<uint32>();
 
+                if (botId == 0)
+                {
+                    LOG_ERROR("server.loading",
+                        "AHBot: Character GUID 0 is reserved for no owner "
+                        "or bidder; configure a dedicated character with a "
+                        "nonzero GUID for account {}",
+                        account);
+                    continue;
+                }
+
                 if (player == 0)
                 {
                     if (debug)
@@ -88,6 +98,9 @@ void AHBot_WorldScript::OnBeforeConfigLoad(bool reload)
 
     if (gBotsId.size() == 0)
     {
+        if (reload)
+            DeleteBots();
+
         LOG_ERROR("server.loading", "AHBot: no characters registered for account {}", account);
         return;
     }
